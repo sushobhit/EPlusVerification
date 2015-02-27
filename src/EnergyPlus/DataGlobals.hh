@@ -152,7 +152,8 @@ namespace DataGlobals {
 	extern bool ShowDecayCurvesInEIO; // true if the Radiant to Convective Decay Curves should appear in the EIO file
 	extern bool AnySlabsInModel; // true if there are any zone-coupled ground domains in the input file
 	extern bool AnyBasementsInModel; // true if there are any basements in the input file
-
+	extern bool ConstantTInOption; // true if the inside slab temperature is set to be constant for BESTEST test, otherwise false. - S.A.
+	extern Real64 SlabInsideT; // Slab inside surface constant temperature entered by user
 } // DataGlobals
 
 } // EnergyPlus

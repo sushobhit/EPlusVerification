@@ -1360,6 +1360,13 @@ namespace DataPlantPipingSystems {
 		int NumDomainCells;
 		int NumGroundSurfCells;
 		int NumInsulationCells;
+		bool ConstantTInOption;
+		bool ConstantTOutOption;
+		bool HarmonicTOutOption;
+		bool ConstantHconvOption;
+		Real64 SlabInsideT;
+		Real64 GroundOutsideT;
+		Real64 GroundOutsideHconv;
 
 		// Main 3D cells array
 		FArray3D< CartesianCell > Cells;
@@ -1418,7 +1425,14 @@ namespace DataPlantPipingSystems {
 			BasementFloorTemp( 0.0 ),
 			NumDomainCells ( 0 ),
 			NumGroundSurfCells( 0 ),
-			NumInsulationCells( 0 )
+			NumInsulationCells( 0 ),
+			ConstantTInOption(false),
+			ConstantTOutOption(false),
+			HarmonicTOutOption(false),
+			ConstantHconvOption(false),
+			SlabInsideT(0.0),
+			GroundOutsideT(0.0),
+			GroundOutsideHconv(0.0)
 
 		{}
 
@@ -1495,6 +1509,13 @@ namespace DataPlantPipingSystems {
 			int const NumDomainCells,
 			int const NumGroundSurfCells,
 			int const NumInsulationCells,
+			bool const ConstantTInOption,
+			bool const ConstantTOutOption,
+			bool const HarmonicTOutOption,
+			bool const ConstantHconvOption,
+			Real64 const SlabInsideT,
+			Real64 const GroundOutsideT,
+			Real64 const GroundOutsideHconv,
 
 			FArray3< CartesianCell > const & Cells			
 		) :
@@ -1569,7 +1590,14 @@ namespace DataPlantPipingSystems {
 			NumDomainCells( NumDomainCells ),
 			NumGroundSurfCells( NumGroundSurfCells ),
 			NumInsulationCells( NumInsulationCells ),
-			Cells( Cells )
+			Cells( Cells ),
+			ConstantTInOption(ConstantTInOption),
+			ConstantTOutOption(ConstantTOutOption),
+			HarmonicTOutOption(HarmonicTOutOption),
+			ConstantHconvOption(ConstantHconvOption),
+			SlabInsideT(SlabInsideT),
+			GroundOutsideT(GroundOutsideT),
+			GroundOutsideHconv(GroundOutsideHconv)
 		{}
 
 	};

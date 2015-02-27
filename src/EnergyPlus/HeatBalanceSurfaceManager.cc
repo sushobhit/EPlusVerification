@@ -5496,6 +5496,11 @@ CalcHeatBalanceInsideSurf( Optional_int_const ZoneToResimulate ) // if passed in
 				}
 			} // ...end of inside surface heat balance equation selection
 
+			// Set constant slab inside face temp for BESTEST - S.A.
+			if (ConstantTInOption) {
+				TempSurfIn(5) = SlabInsideT;
+			}
+
 			TH12 = TempSurfIn( SurfNum );
 			TempSurfInRep( SurfNum ) = TempSurfIn( SurfNum );
 			TempSurfOut( SurfNum ) = TH11; // For reporting
