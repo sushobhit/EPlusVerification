@@ -3,6 +3,7 @@
 
 // ObjexxFCL Headers
 #include <ObjexxFCL/FArray1D.hh>
+#include <ObjexxFCL/FArray2D.hh>
 #include <ObjexxFCL/FArray3D.hh>
 
 // EnergyPlus Headers
@@ -30,6 +31,8 @@ namespace DataPlantPipingSystems {
 	extern int const PartitionType_HorizInsXSide;
 	extern int const PartitionType_HorizInsZSide;
 	extern int const PartitionType_VertInsLowerEdge;
+	extern int const PartitionType_XPartition;
+	extern int const PartitionType_ZPartition;
 
 
 	extern int const RegionType_Pipe;
@@ -47,9 +50,12 @@ namespace DataPlantPipingSystems {
 	extern int const RegionType_HorizInsXSide;
 	extern int const RegionType_HorizInsZSide;
 	extern int const RegionType_VertInsLowerEdge;
+	extern int const RegionType_XPartition;
+	extern int const RegionType_ZPartition;
 
 	extern int const MeshDistribution_Uniform;
 	extern int const MeshDistribution_SymmetricGeometric;
+	extern int const MeshDistribution_Geometric;
 
 	extern int const SegmentFlow_IncreasingZ;
 	extern int const SegmentFlow_DecreasingZ;
@@ -1364,9 +1370,20 @@ namespace DataPlantPipingSystems {
 		bool ConstantTOutOption;
 		bool HarmonicTOutOption;
 		bool ConstantHconvOption;
+		bool CorePeriFlag;
+		bool WeightedFluxFlag;
 		Real64 SlabInsideT;
 		Real64 GroundOutsideT;
 		Real64 GroundOutsideHconv;
+		Real64 CoreTemp;
+		Real64 PerimeterTemp;
+		Real64 CoreFlux;
+		Real64 PerimeterFlux;
+		FArray2D< Real64 > WeightedHeatFlux;
+		int Xpartition;
+		int Zpartition;
+
+
 
 		// Main 3D cells array
 		FArray3D< CartesianCell > Cells;
@@ -1430,9 +1447,17 @@ namespace DataPlantPipingSystems {
 			ConstantTOutOption(false),
 			HarmonicTOutOption(false),
 			ConstantHconvOption(false),
+			CorePeriFlag(false),
+			WeightedFluxFlag(false),
 			SlabInsideT(0.0),
 			GroundOutsideT(0.0),
-			GroundOutsideHconv(0.0)
+			GroundOutsideHconv(0.0),
+			CoreTemp(0.0),
+			PerimeterTemp(0.0),
+			CoreFlux(0.0),
+			PerimeterFlux(0.0),
+			Xpartition(0),
+			Zpartition(0)
 
 		{}
 
@@ -1513,11 +1538,20 @@ namespace DataPlantPipingSystems {
 			bool const ConstantTOutOption,
 			bool const HarmonicTOutOption,
 			bool const ConstantHconvOption,
+			bool const CorePeriFlag,
+			bool const WeightedFluxFlag,
 			Real64 const SlabInsideT,
 			Real64 const GroundOutsideT,
 			Real64 const GroundOutsideHconv,
+			Real64 const CoreTemp,
+			Real64 const PerimeterTemp,
+			Real64 const CoreFlux,
+			Real64 const PerimeterFlux,
+			FArray2< Real64 > const & WeightedHeatFlux,
+			FArray3< CartesianCell > const & Cells,
+			int const Xpartition,
+			int const Zpartition
 
-			FArray3< CartesianCell > const & Cells			
 		) :
 			Name( Name ),
 			CircuitNames( CircuitNames ),
@@ -1595,9 +1629,21 @@ namespace DataPlantPipingSystems {
 			ConstantTOutOption(ConstantTOutOption),
 			HarmonicTOutOption(HarmonicTOutOption),
 			ConstantHconvOption(ConstantHconvOption),
+			CorePeriFlag(CorePeriFlag),
+			WeightedFluxFlag(WeightedFluxFlag),
 			SlabInsideT(SlabInsideT),
 			GroundOutsideT(GroundOutsideT),
-			GroundOutsideHconv(GroundOutsideHconv)
+			GroundOutsideHconv(GroundOutsideHconv),
+			CoreTemp(CoreTemp),
+			PerimeterTemp(PerimeterTemp),
+			CoreFlux(CoreFlux),
+			PerimeterFlux(PerimeterFlux),
+			WeightedHeatFlux(WeightedHeatFlux),
+			Xpartition(Xpartition),
+			Zpartition(Zpartition)
+
+		
+			
 		{}
 
 	};

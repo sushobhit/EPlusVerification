@@ -668,12 +668,14 @@ namespace PlantPipingSystemsManager {
 		bool const PartitionsExist,
 		Optional_int BasementWallXIndex = _,
 		Optional_int BasementFloorYIndex = _,
+		Optional_int XPartition=_,
 		Optional_int XIndex = _,
 		Optional_int XWallIndex = _,
 		Optional_int InsulationXIndex = _,
 		Optional_int YIndex = _,
 		Optional_int YFloorIndex = _,
 		Optional_int InsulationYIndex = _,
+		Optional_int ZPartition=_,
 		Optional_int ZIndex = _,
 		Optional_int ZWallIndex = _,
 		Optional_int InsulationZIndex = _
@@ -753,7 +755,8 @@ namespace PlantPipingSystemsManager {
 	int
 	GetCellWidthsCount(
 		int const DomainNum,
-		int const dir // From Enum: RegionType
+		int const dir, // From Enum: RegionType
+		int const n
 	);
 
 	//*********************************************************************************************!
@@ -787,7 +790,13 @@ namespace PlantPipingSystemsManager {
 
 	//*********************************************************************************************!
 	void
-		PerformTemperatureUpdate(int const DomainNum);
+		PerformTemperatureResultsUpdate(int const DomainNum);
+
+	//*********************************************************************************************!
+
+	//*********************************************************************************************!
+	void
+		PerformTemperatureResultsUpdateBESTEST(int const DomainNum);
 
 	//*********************************************************************************************!
 
@@ -883,14 +892,36 @@ namespace PlantPipingSystemsManager {
 		int const DomainNum,
 		int const CellType
 	);
+	
+	//*********************************************************************************************!
 
+	//*********************************************************************************************!
+		
 	Real64
-		GetAverageInterfaceTemp(
+		GetPerimeterAverageTemp(
 		int const DomainNum,
-		int const CellType,
-		int const CellType2
+		int const CellType
 		);
 	
+	//*********************************************************************************************!
+
+	//*********************************************************************************************!
+	Real64
+		GetCoreAverageTemp(
+		int const DomainNum,
+		int const CellType
+		);
+
+	//*********************************************************************************************!
+
+	//*********************************************************************************************!
+
+	Real64
+		GetSlabArea(
+		int const DomainNum,
+		int const CellType
+		);
+
 	//*********************************************************************************************!
 
 	//*********************************************************************************************!
