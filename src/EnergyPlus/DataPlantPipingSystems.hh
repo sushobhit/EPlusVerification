@@ -1369,7 +1369,7 @@ namespace DataPlantPipingSystems {
 		bool ConstantTInOption;
 		bool ConstantTOutOption;
 		bool HarmonicTOutOption;
-		bool ConstantHconvOption;
+		bool BESTESTConstantHconv;
 		bool CorePeriFlag;
 		bool WeightedFluxFlag;
 		Real64 SlabInsideT;
@@ -1446,7 +1446,7 @@ namespace DataPlantPipingSystems {
 			ConstantTInOption(false),
 			ConstantTOutOption(false),
 			HarmonicTOutOption(false),
-			ConstantHconvOption(false),
+			BESTESTConstantHconv(false),
 			CorePeriFlag(false),
 			WeightedFluxFlag(false),
 			SlabInsideT(0.0),
@@ -1537,7 +1537,7 @@ namespace DataPlantPipingSystems {
 			bool const ConstantTInOption,
 			bool const ConstantTOutOption,
 			bool const HarmonicTOutOption,
-			bool const ConstantHconvOption,
+			bool const BESTESTConstantHconv,
 			bool const CorePeriFlag,
 			bool const WeightedFluxFlag,
 			Real64 const SlabInsideT,
@@ -1628,7 +1628,7 @@ namespace DataPlantPipingSystems {
 			ConstantTInOption(ConstantTInOption),
 			ConstantTOutOption(ConstantTOutOption),
 			HarmonicTOutOption(HarmonicTOutOption),
-			ConstantHconvOption(ConstantHconvOption),
+			BESTESTConstantHconv(BESTESTConstantHconv),
 			CorePeriFlag(CorePeriFlag),
 			WeightedFluxFlag(WeightedFluxFlag),
 			SlabInsideT(SlabInsideT),

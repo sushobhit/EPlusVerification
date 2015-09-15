@@ -29,19 +29,13 @@ Site:GroundDomain:Slab,
     , !- Vertical Insulation Name
     , !- Vertical perimeter insulation depth from surface (m)
     Hourly,	!- Domain Simulation Interval. (Timestep/Hourly)
-	no, ! - Set constant interior (slab) surface temperature? (Yes/No)
-	, ! - Interior (slab) surface temperature (C)
-	no, ! - Set constant exterior (ground) surface temperature? (Yes/No)
-	, ! - Exterior (ground) surface temperature (C)
-	No, ! - Set harmonic variation of exterior (ground) surface temperature? (Temperatures are set using the appropriate weather file)
-	yes, ! - Set outer surface convection coefficient? (Only if constant surface temperature is NOT used)
-	100, ! - Exterior surface convection coefficient (W/m2-K)
+	Geometric, ! - Mesh Type (Uniform/Geometric)
 	22,  ! - x direction mesh parameter
 	22,  ! - y direction mesh parameter
 	22,  ! - z direction mesh parameter
-	no,  ! - Use core and perimeter heat fluxes
-	yes, ! - Weighted heat flux distribution
-	1.27;	 ! - Geometric mesh coefficient
+	1.27,	 ! - Geometric mesh coefficient
+	yes, ! - Set ground surface convection coefficient for BESTEST tests? 
+	100; ! - Ground surface convection coefficient (W/m2-K)
 
 
 !*************************************************

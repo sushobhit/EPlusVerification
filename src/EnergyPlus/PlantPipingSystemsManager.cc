@@ -361,14 +361,6 @@ namespace PlantPipingSystemsManager {
 			FArray2D< Real64 > WeightedTerm;
 			FArray2D< Real64 > HF;
 
-
-			Real64 qp = 0.0;
-			Real64 qc = 0.0;
-			Real64 Tp = 0.0;
-			Real64 Tc = 0.0;
-			Real64 TempFactor = 0.0;
-			Real64 Ap = 0.0;
-			Real64 Ac = 0.0;
 			Real64 Atotal = 0;
 			int Xmax = 0;
 			int Ymax = 0;
@@ -424,54 +416,46 @@ namespace PlantPipingSystemsManager {
 					PipingSystemDomains( DomainNum ).NumHeatFlux += 1;
 					PipingSystemDomains( DomainNum ).HeatFlux = PipingSystemDomains( DomainNum ).AggregateHeatFlux / PipingSystemDomains( DomainNum ).NumHeatFlux;
 
-					// Determine flux for each cell depending on temperatures
-					if (PipingSystemDomains(DomainNum).WeightedFluxFlag){
-						Xmax = ubound(PipingSystemDomains(DomainNum).Cells, 1);
-						Ymax = ubound(PipingSystemDomains(DomainNum).Cells, 2);
-						Zmax = ubound(PipingSystemDomains(DomainNum).Cells, 3);
-						Y = Ymax;
-						//WeightedArea = YNormalArea(PipingSystemDomains(DomainNum).Cells(Xmax, Y, Zmax));
+					Xmax = ubound(PipingSystemDomains(DomainNum).Cells, 1);
+					Ymax = ubound(PipingSystemDomains(DomainNum).Cells, 2);
+					Zmax = ubound(PipingSystemDomains(DomainNum).Cells, 3);
+					Y = Ymax;
+					
+					Atotal = PipingSystemDomains(DomainNum).SlabLength*PipingSystemDomains(DomainNum).SlabWidth; 
 
-						Atotal = 36;//PipingSystemDomains(DomainNum).SlabLength*PipingSystemDomains(DomainNum).SlabWidth; Constant for BESTEST
+					WeightedTerm.allocate({ 0, Xmax }, { 0, Zmax });
+					HF.allocate({ 0, Xmax }, { 0, Zmax });
+					PipingSystemDomains(DomainNum).WeightedHeatFlux.allocate({ 0, Xmax }, { 0, Zmax });
 
-						WeightedTerm.allocate({ 0, Xmax }, { 0, Zmax });
-						HF.allocate({ 0, Xmax }, { 0, Zmax });
-						PipingSystemDomains(DomainNum).WeightedHeatFlux.allocate({ 0, Xmax }, { 0, Zmax });
-
-						for (Z = lbound(PipingSystemDomains(DomainNum).Cells, 3); Z <= ubound(PipingSystemDomains(DomainNum).Cells, 3); ++Z) {
-							for (X = lbound(PipingSystemDomains(DomainNum).Cells, 1); X <= ubound(PipingSystemDomains(DomainNum).Cells, 1); ++X) {
-								// Zone interface cells
-								if (PipingSystemDomains(DomainNum).Cells(X, Y, Z).CellType == CellType_ZoneGroundInterface){
-									WeightedTerm(X, Z) = (Tzone - PipingSystemDomains(DomainNum).Cells(X, Y, Z).MyBase.Temperature_PrevTimeStep) / (Tzone - PipingSystemDomains(DomainNum).Cells(Xmax, Ymax, Zmax).MyBase.Temperature_PrevTimeStep);
-									WeightedArea += WeightedTerm(X,Z) * YNormalArea(PipingSystemDomains(DomainNum).Cells(X, Y, Z));
-									if (DayOfMonth == 30 && HourOfDay == 23){
-										myfile <<Atotal<< "," << PipingSystemDomains(DomainNum).HeatFlux << "," << X << "," << Z << "," << Tzone<< "," << WeightedTerm(X, Z) << "," << WeightedArea << "," << HF(Xmax, Zmax) << "," << HF(X, Z) << std::endl;
-									}
+					for (Z = lbound(PipingSystemDomains(DomainNum).Cells, 3); Z <= ubound(PipingSystemDomains(DomainNum).Cells, 3); ++Z) {
+						for (X = lbound(PipingSystemDomains(DomainNum).Cells, 1); X <= ubound(PipingSystemDomains(DomainNum).Cells, 1); ++X) {
+							// Zone interface cells
+							if (PipingSystemDomains(DomainNum).Cells(X, Y, Z).CellType == CellType_ZoneGroundInterface){
+								WeightedTerm(X, Z) = (Tzone - PipingSystemDomains(DomainNum).Cells(X, Y, Z).MyBase.Temperature_PrevTimeStep) / (Tzone - PipingSystemDomains(DomainNum).Cells(Xmax, Ymax, Zmax).MyBase.Temperature_PrevTimeStep);
+								WeightedArea += WeightedTerm(X,Z) * YNormalArea(PipingSystemDomains(DomainNum).Cells(X, Y, Z));
+								if (DayOfMonth == 30 && HourOfDay == 23){
+									myfile <<Atotal<< "," << PipingSystemDomains(DomainNum).HeatFlux << "," << X << "," << Z << "," << Tzone<< "," << WeightedTerm(X, Z) << "," << WeightedArea << "," << HF(Xmax, Zmax) << "," << HF(X, Z) << std::endl;
 								}
 							}
 						}
-						//Get heat flux for center cell first
-						HF(Xmax, Zmax) = PipingSystemDomains(DomainNum).HeatFlux * Atotal / WeightedArea;
-
-						//Then get temperature weighted heat flux for each cell 
-						for (Z = lbound(PipingSystemDomains(DomainNum).Cells, 3); Z <= ubound(PipingSystemDomains(DomainNum).Cells, 3); ++Z) {
-							for (X = lbound(PipingSystemDomains(DomainNum).Cells, 1); X <= ubound(PipingSystemDomains(DomainNum).Cells, 1); ++X) {
-								// Zone interface cells
-								if (PipingSystemDomains(DomainNum).Cells(X, Y, Z).CellType == CellType_ZoneGroundInterface){
-									HF(X, Z) = WeightedTerm(X, Z) * HF(Xmax, Zmax);
-									if (DayOfMonth == 30 && HourOfDay == 23){
-										myfile << Atotal<<"," << PipingSystemDomains(DomainNum).HeatFlux << "," << X << "," << Z << "," << Tzone << "," << WeightedTerm(X, Z) << "," << WeightedArea << "," << HF(Xmax, Zmax) << "," << HF(X, Z) << std::endl;
-									}
-								}
-							}
-						}
-						//Finally, assign heat flux values to PipingSystem arrays for temperture calculations for this time step
-						PipingSystemDomains(DomainNum).WeightedHeatFlux = HF;
-
-						
 					}
+					//Get heat flux for center cell first
+					HF(Xmax, Zmax) = PipingSystemDomains(DomainNum).HeatFlux * Atotal / WeightedArea;
 
-
+					//Then get temperature weighted heat flux for each cell 
+					for (Z = lbound(PipingSystemDomains(DomainNum).Cells, 3); Z <= ubound(PipingSystemDomains(DomainNum).Cells, 3); ++Z) {
+						for (X = lbound(PipingSystemDomains(DomainNum).Cells, 1); X <= ubound(PipingSystemDomains(DomainNum).Cells, 1); ++X) {
+							// Zone interface cells
+							if (PipingSystemDomains(DomainNum).Cells(X, Y, Z).CellType == CellType_ZoneGroundInterface){
+								HF(X, Z) = WeightedTerm(X, Z) * HF(Xmax, Zmax);
+								if (DayOfMonth == 30 && HourOfDay == 23){
+									myfile << Atotal<<"," << PipingSystemDomains(DomainNum).HeatFlux << "," << X << "," << Z << "," << Tzone << "," << WeightedTerm(X, Z) << "," << WeightedArea << "," << HF(Xmax, Zmax) << "," << HF(X, Z) << std::endl;
+								}
+							}
+						}
+					}
+					//Finally, assign heat flux values to PipingSystem arrays for temperture calculations for this time step
+					PipingSystemDomains(DomainNum).WeightedHeatFlux = HF;
 				}
 				//Coupled basement
 				else{
@@ -1413,31 +1397,29 @@ namespace PlantPipingSystemsManager {
 				// Get mesh parameters
 				
 				// Mesh inputs
-				/*{ auto const meshDistribution( uppercased( cAlphaArgs( 10 ) ) );
+				{ auto const meshDistribution( uppercased( cAlphaArgs( 11 ) ) );
 				if ( meshDistribution == "UNIFORM" ) {
 					PipingSystemDomains( DomainCtr ).Mesh.X.MeshDistribution = MeshDistribution_Uniform;
 					PipingSystemDomains( DomainCtr ).Mesh.Y.MeshDistribution = MeshDistribution_Uniform;
 					PipingSystemDomains( DomainCtr ).Mesh.Z.MeshDistribution = MeshDistribution_Uniform;
 				}
 				else if ( meshDistribution == "GEOMETRIC" ) {
-				*/	
-				//Only geometric is needed for now. Clean up.
-
+				
 					PipingSystemDomains( DomainCtr ).Mesh.X.MeshDistribution = MeshDistribution_Geometric;
 					PipingSystemDomains( DomainCtr ).Mesh.Y.MeshDistribution = MeshDistribution_Geometric;
 					PipingSystemDomains( DomainCtr ).Mesh.Z.MeshDistribution = MeshDistribution_Geometric;
 					
-					PipingSystemDomains( DomainCtr ).Mesh.X.GeometricSeriesCoefficient = rNumericArgs( 21 );
-					PipingSystemDomains( DomainCtr ).Mesh.Y.GeometricSeriesCoefficient = rNumericArgs( 21 );
-					PipingSystemDomains( DomainCtr ).Mesh.Z.GeometricSeriesCoefficient = rNumericArgs( 21 );
-				/*}
+					PipingSystemDomains( DomainCtr ).Mesh.X.GeometricSeriesCoefficient = rNumericArgs( 18 );
+					PipingSystemDomains( DomainCtr ).Mesh.Y.GeometricSeriesCoefficient = rNumericArgs( 18 );
+					PipingSystemDomains( DomainCtr ).Mesh.Z.GeometricSeriesCoefficient = rNumericArgs( 18 );
+				}
 				else {
-					IssueSevereInputFieldError( RoutineName, ObjName_ZoneCoupled_Slab, cAlphaArgs( 1 ), cAlphaFieldNames( 10 ), cAlphaArgs( 10 ), "Use a choice from the available mesh type keys.", ErrorsFound );
-				}}*/
+					IssueSevereInputFieldError( RoutineName, ObjName_ZoneCoupled_Slab, cAlphaArgs( 1 ), cAlphaFieldNames( 11 ), cAlphaArgs( 11 ), "Use a choice from the available mesh type keys.", ErrorsFound );
+				}}
 
-				PipingSystemDomains( DomainCtr ).Mesh.X.RegionMeshCount = rNumericArgs( 18 );
-				PipingSystemDomains( DomainCtr ).Mesh.Y.RegionMeshCount = rNumericArgs( 19 );
-				PipingSystemDomains( DomainCtr ).Mesh.Z.RegionMeshCount = rNumericArgs( 20 );
+				PipingSystemDomains( DomainCtr ).Mesh.X.RegionMeshCount = rNumericArgs( 15 );
+				PipingSystemDomains( DomainCtr ).Mesh.Y.RegionMeshCount = rNumericArgs( 16 );
+				PipingSystemDomains( DomainCtr ).Mesh.Z.RegionMeshCount = rNumericArgs( 17 );
 				
 				// Soil properties
 				PipingSystemDomains( DomainCtr ).GroundProperties.Conductivity = Domain( ZoneCoupledDomainCtr ).SoilConductivity;
@@ -1474,7 +1456,6 @@ namespace PlantPipingSystemsManager {
 
 					AverageSurfaceTemp = PipingSystemDomains(DomainCtr).Farfield.AverageGroundTemperature;
 					 
-
 					//Calculate Average Amplitude from Average:
 					PipingSystemDomains( DomainCtr ).Farfield.AverageGroundTemperatureAmplitude = 0.0;
 					for ( MonthIndex = 1; MonthIndex <= MonthsInYear; ++MonthIndex ) {
@@ -1510,77 +1491,17 @@ namespace PlantPipingSystemsManager {
 				// setup output variables
 				SetupZoneCoupledOutputVariables( ZoneCoupledDomainCtr );
 
-				//Set flags and get inputs for BESTEST test cases. - SA
-				// Direct constant slab temp input
-				if (SameString(cAlphaArgs(11), "NO")) {
-					PipingSystemDomains(DomainCtr).ConstantTInOption = false;
-				}
-				else if (SameString(cAlphaArgs(11), "YES")) {
-					PipingSystemDomains(DomainCtr).ConstantTInOption = true;
-					PipingSystemDomains(DomainCtr).SlabInsideT = rNumericArgs(15);
-					ConstantTInOption = true;
-					SlabInsideT = PipingSystemDomains(DomainCtr).SlabInsideT;
-				}
-				else {
-					ShowContinueError("Constant slab temp option not entered.");
-					ShowFatalError("Preceding error causes program termination.");
-				}
-				// Direct outside ground surface temp input
+				//Set flag and get input for BESTEST test cases. - SA
+				// Constant ground surface convection coefficient case
 				if (SameString(cAlphaArgs(12), "NO")) {
-					PipingSystemDomains(DomainCtr).ConstantTOutOption = false;
+					PipingSystemDomains(DomainCtr).BESTESTConstantHconv = false;
 				}
 				else if (SameString(cAlphaArgs(12), "YES")) {
-					PipingSystemDomains(DomainCtr).ConstantTOutOption = true;
-					PipingSystemDomains(DomainCtr).GroundOutsideT = rNumericArgs(16);
-				}
-				else {
-					ShowContinueError("Constant ground surface temp option not entered.");
-					ShowFatalError("Preceding error causes program termination.");
-				}
-				// Harmonic variation of ground surface temp
-				if (SameString(cAlphaArgs(13), "NO")) {
-					PipingSystemDomains(DomainCtr).HarmonicTOutOption = false;
-				}
-				else if (SameString(cAlphaArgs(13), "YES")) {
-					PipingSystemDomains(DomainCtr).HarmonicTOutOption = true;
+					PipingSystemDomains(DomainCtr).BESTESTConstantHconv = true;
+					PipingSystemDomains(DomainCtr).GroundOutsideHconv = rNumericArgs(19);
 				}
 				else {
 					ShowContinueError("Harmonic-variation ground surface temp option not entered.");
-					ShowFatalError("Preceding error causes program termination.");
-				}
-
-				// Constant ground surface convection coefficient
-				if (SameString(cAlphaArgs(14), "NO")) {
-					PipingSystemDomains(DomainCtr).ConstantHconvOption = false;
-				}
-				else if (SameString(cAlphaArgs(14), "YES")) {
-					PipingSystemDomains(DomainCtr).ConstantHconvOption = true;
-					PipingSystemDomains(DomainCtr).GroundOutsideHconv = rNumericArgs(17);
-				}
-				else {
-					ShowContinueError("Harmonic-variation ground surface temp option not entered.");
-					ShowFatalError("Preceding error causes program termination.");
-				}
-				//Set flag for core and perimeter heat flux split test
-				if (SameString(cAlphaArgs(15), "NO")) {
-					PipingSystemDomains(DomainCtr).CorePeriFlag = false;
-				}
-				else if (SameString(cAlphaArgs(15), "YES")) {
-					PipingSystemDomains(DomainCtr).CorePeriFlag = true;
-				}
-				else {
-					ShowContinueError("Core and perimeter heat flux option not entered.");
-					ShowFatalError("Preceding error causes program termination.");
-				}
-				//Set flag for weighted heat flux distribution here
-				if (SameString(cAlphaArgs(16), "NO")) {
-					PipingSystemDomains(DomainCtr).WeightedFluxFlag = false;
-				}
-				else if (SameString(cAlphaArgs(16), "YES")) {
-					PipingSystemDomains(DomainCtr).WeightedFluxFlag = true;
-				}
-				else {
-					ShowContinueError("Weighted heat flux option not entered.");
 					ShowFatalError("Preceding error causes program termination.");
 				}
 			}
@@ -7207,24 +7128,13 @@ namespace PlantPipingSystemsManager {
 					else if ( ( SELECT_CASE_var == CellType_GeneralField ) || ( SELECT_CASE_var == CellType_Slab ) || ( SELECT_CASE_var == CellType_HorizInsulation ) || ( SELECT_CASE_var == CellType_VertInsulation ) ) {
 						PipingSystemDomains( DomainNum ).Cells( X, Y, Z ).MyBase.Temperature = EvaluateFieldCellTemperature( DomainNum, PipingSystemDomains( DomainNum ).Cells( X, Y, Z ) );
 					}
-					// Check for BESTEST test flags - S.A.
 					else if ( SELECT_CASE_var == CellType_GroundSurface ) {
-						// Set ground surface temps
-						//if (PipingSystemDomains(DomainNum).ConstantTOutOption){
-						//	PipingSystemDomains(DomainNum).Cells(X, Y, Z).MyBase.Temperature = PipingSystemDomains(DomainNum).GroundOutsideT;
-						//}
-						//else if (PipingSystemDomains(DomainNum).HarmonicTOutOption){
-						//	// Set equal to outside air temp 
-						//	PipingSystemDomains(DomainNum).Cells(X, Y, Z).MyBase.Temperature = OutDryBulbTemp;
-						//}
-						//else{
-							PipingSystemDomains(DomainNum).Cells(X, Y, Z).MyBase.Temperature = EvaluateGroundSurfaceTemperature( DomainNum, PipingSystemDomains( DomainNum ).Cells( X, Y, Z ) );
-						//}
+						PipingSystemDomains(DomainNum).Cells(X, Y, Z).MyBase.Temperature = EvaluateGroundSurfaceTemperature( DomainNum, PipingSystemDomains( DomainNum ).Cells( X, Y, Z ) );
 					}
 					// Set constant deep ground temp for BESTEST tests - S.A.
 					else if ( SELECT_CASE_var == CellType_FarfieldBoundary ) {
 						// Check if BESTEST test, and then, if cell is deep ground.
-						if ( Y == lbound(PipingSystemDomains(DomainNum).Cells, 2)){
+						if ( Y == lbound(PipingSystemDomains(DomainNum).Cells, 2) && PipingSystemDomains(DomainNum).BESTESTConstantHconv ) {
 							PipingSystemDomains(DomainNum).Cells(X, Y, Z).MyBase.Temperature = 10;
 						}
 						else{
@@ -7564,9 +7474,7 @@ namespace PlantPipingSystemsManager {
 		Real64 GroundCoverCoefficient;
 
 		std::ofstream static myfile("groundsurface.csv", std::ofstream::out);
-
-
-		
+				
 		//retrieve information from E+ globals
 		Latitude_Degrees = Latitude;
 		StMeridian_Degrees = -TimeZoneMeridian; //Standard meridian, degrees W
@@ -7632,8 +7540,8 @@ namespace PlantPipingSystemsManager {
 					Denominator += ( Beta / Resistance );
 				} else if ( SELECT_CASE_var == Direction_PositiveY ) {
 					// Assign convective coefficient value here for BESTEST tests. - S.A.
-					if (PipingSystemDomains(DomainNum).ConstantHconvOption){
-						//No heat transfer to cells next to the slab, to simulate ground under 24cm wall as required by BESTEST.
+					if (PipingSystemDomains(DomainNum).BESTESTConstantHconv){
+						//No heat transfer to the 6 surface cells next to the slab, to simulate ground under the 24cm zone walls.
 						if (cell.X_index > PipingSystemDomains(DomainNum).Mesh.X.RegionMeshCount && cell.Z_index > PipingSystemDomains(DomainNum).Mesh.Z.RegionMeshCount ){
 							Resistance = 10000000;
 						}
@@ -7642,9 +7550,6 @@ namespace PlantPipingSystemsManager {
 						}
 						Numerator = Numerator + (Beta / Resistance) * PipingSystemDomains(DomainNum).Cur.CurAirTemp;
 						Denominator = Denominator + (Beta / Resistance);
-						/*if (DayOfMonth == 30){
-							myfile << cell.X_index << "," << cell.Y_index << "," << cell.Z_index << "," << CurDirection << "," << Numerator << "," << cell.MyBase.Temperature << "," << Resistance << "," << PipingSystemDomains(DomainNum).Cur.CurAirTemp << "," << PipingSystemDomains(DomainNum).GroundOutsideHconv << "," << ThisNormalArea << std::endl;
-						}*/
 					}
 					else{
 						// convection at the surface
@@ -7695,7 +7600,7 @@ namespace PlantPipingSystemsManager {
 		IncidentHeatGain = 0.0;
 
 		// Assign IncidentHeatGain a value of 0 for BESTEST tests. - S.A.
-		if (PipingSystemDomains(DomainNum).ConstantHconvOption){
+		if (PipingSystemDomains(DomainNum).BESTESTConstantHconv){
 			IncidentHeatGain = 0;
 		}
 		else
@@ -8282,33 +8187,9 @@ namespace PlantPipingSystemsManager {
 				Numerator += Beta * HeatFlux * Width( cell ) * Depth( cell );
 			}
 			if ( SELECT_CASE_var == CellType_ZoneGroundInterface ) {
-				// Get the average slab heat flux and add it to the tally
-
-				//Core and perimeter averaged?
-				if (PipingSystemDomains(DomainNum).CorePeriFlag){
-					// Add core flux or perimeter flux depending on cell
-					if (cell.Centroid.X >= PipingSystemDomains(DomainNum).PerimeterOffset + 1.0 && cell.Centroid.Z >= PipingSystemDomains(DomainNum).PerimeterOffset + 1.0)
-					{
-						HeatFlux = PipingSystemDomains(DomainNum).CoreFlux;
-						Numerator += Beta * HeatFlux * Width(cell) * Depth(cell);
-
-					}
-					else{
-						HeatFlux = PipingSystemDomains(DomainNum).PerimeterFlux;
-						Numerator += Beta * HeatFlux * Width(cell) * Depth(cell);
-
-					}
-				}
-				else if (PipingSystemDomains(DomainNum).WeightedFluxFlag){
 				//Heat flux to each cell based on temperature weighing
-					HeatFlux = PipingSystemDomains(DomainNum).WeightedHeatFlux(cell.X_index, cell.Z_index);
-					Numerator += Beta * HeatFlux * Width(cell) * Depth(cell);
-				}
-
-				else{
-					HeatFlux = PipingSystemDomains(DomainNum).HeatFlux;
-					Numerator += Beta * HeatFlux * Width(cell) * Depth(cell);
-				}
+				HeatFlux = PipingSystemDomains(DomainNum).WeightedHeatFlux(cell.X_index, cell.Z_index);
+				Numerator += Beta * HeatFlux * Width(cell) * Depth(cell);
 			}}
 
 			//determine the neighbor types based on cell location
@@ -8690,7 +8571,7 @@ namespace PlantPipingSystemsManager {
 			Denominator += ( Beta / Resistance );
 		}
 		// Make farfield boundaries adiabatic for BESTEST tests. - S.A.
-		if (PipingSystemDomains(DomainNum).ConstantTOutOption || PipingSystemDomains(DomainNum).ConstantHconvOption || PipingSystemDomains(DomainNum).HarmonicTOutOption){
+		if (PipingSystemDomains(DomainNum).BESTESTConstantHconv){
 			//ignore  
 		}
 		else{

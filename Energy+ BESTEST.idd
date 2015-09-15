@@ -1860,44 +1860,30 @@ Site:GroundDomain:Slab,
         \key Timestep
         \default Hourly
         \note This field specifies the ground domain simulation timestep.
-   A11, \field Set constant interior (slab) surface temperature? (Yes/No)
+   A11, \field Set mesh type (Uniform/Geometric)
 		\required-field
-   N15, \field Interior (slab) surface temperature (C)
-		\field-optional
-   A12, \field Set constant exterior (ground) surface temperature? (Yes/No)
+		\type choice
+		\key Uniform
+		\key Geometric
+   N15, \field X Mesh Density Parameter
+        \type integer
+        \default 4
+        \minimum 2
+   N16, \field Y Mesh Density Parameter
+        \type integer
+        \default 4
+        \minimum 2
+   N17, \field Z Mesh Density Parameter
+        \type integer
+        \default 4
+        \minimum 2
+   N18, \field Geometric mesh coefficient
+		\type real
+   A12, \field Set ground surface convection coefficient for BESTEST tests? 
 		\required-field
-   N16, \field Exterior (ground) surface temperature (C)
-		\field-optional
-   A13, \field Set harmonic variation of exterior (ground) surface temperature? (Temperatures are set using the appropriate weather file)
-		\required-field
-   A14, \field Set outer surface convection coefficient? (Only if constant surface temperature is NOT used)
-		\required-field
-   N17, \field Exterior surface convection coefficient (W/m2-K)
+   N19; \field Ground surface convection coefficient (W/m2-K)
 		\field-optional	
-   N18, \field X Mesh Density Parameter
-        \type integer
-        \default 4
-        \minimum 2
-   N19, \field Y Mesh Density Parameter
-        \type integer
-        \default 4
-        \minimum 2
-   N20, \field Z Mesh Density Parameter
-        \type integer
-        \default 4
-        \minimum 2
-   A15, \Core and perimeter fluxes (yes/no)
-		\type choice
-        \key Yes
-        \key No
-        \default No
-   A16, \Weighted Heat Flux option
-		\type choice
-        \key Yes
-        \key No
-        \default No
-	N21; \field Geometric mesh coefficient
-		 \type real
+  
 		 
    
 Site:GroundDomain:Basement,
